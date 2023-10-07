@@ -1,10 +1,10 @@
-import { Column } from "../../types/Column";
+import { GridColDef } from "@mui/x-data-grid/models/colDef/gridColDef";
 
-const columns: Column[] = [
-  { id: "name", label: "Donor's Name", minWidth: 170 },
-  { id: "type", label: "Donation Type", minWidth: 100 },
-  { id: "quantity", label: "Quantity", minWidth: 100 },
-  { id: "date", label: "Date", minWidth: 100 },
+const columns: GridColDef[] = [
+  { field: "name", headerName: "Donor's Name", minWidth: 170 },
+  { field: "type", headerName: "Donation Type", minWidth: 100 },
+  { field: "quantity", headerName: "Quantity", type: "number", minWidth: 100 },
+  { field: "date", headerName: "Date", minWidth: 100 },
 ];
 
 export default columns;
