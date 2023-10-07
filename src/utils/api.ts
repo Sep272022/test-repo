@@ -11,7 +11,7 @@ export const saveDonation = async (donation: Donation) => {
   return Promise.resolve(donation);
 };
 
-export const loadDonations = async () => {
+export const getAllDonations = async () => {
   await delay(1000);
   return Promise.resolve(mock_donation);
 };
