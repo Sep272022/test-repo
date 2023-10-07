@@ -13,11 +13,11 @@ interface RegistrationProps {
 function Registration({ onSubmit }: RegistrationProps) {
   const [name, setName] = useState<string>("");
   const [selectedDonationType, setSelectedDonationType] =
-    useState<string>("food");
+    useState<string>("Food");
   const [quantity, setQuantity] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(null);
 
-  const donationTypes = ["food", "money", "clothing", "other"];
+  const donationTypes = ["Food", "Money", "Clothing", "Other"];
 
   function handleSubmit(): void {
     // TODO: validate
@@ -34,7 +34,7 @@ function Registration({ onSubmit }: RegistrationProps) {
   // TODO: add indicator for whether the donation was successfully submitted
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ display: "flex", p: 3, flexWrap: "wrap" }}>
+      <Box sx={{ p: 3 }}>
         <div>
           <FormControl>
             <TextField
