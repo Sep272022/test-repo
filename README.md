@@ -13,7 +13,7 @@
 
 ## Donation Distribution
 
-* An user can see donation logs that contain the type of donation, quantity, and the date of distribution
+* An user can see distribution logs that contain the type of donation, quantity, and the date of distribution
 
 ## Donation Reports
 
