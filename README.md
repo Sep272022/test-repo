@@ -1,27 +1,21 @@
-# React + TypeScript + Vite
+# Requirement
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Donation Registration
 
-Currently, two official plugins are available:
+* An user can submit the detail of a donation record
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+|name | type|
+|-----|-----|
+|Donor's name | string|
+|Type of donation| string|
+|Quantity| number|
+|Date of donation| string|
 
-## Expanding the ESLint configuration
+## Donation Distribution
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+* An user can see donation logs that contain the type of donation, quantity, and the date of distribution
 
-- Configure the top-level `parserOptions` property like this:
+## Donation Reports
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+* An inventory report displaying the current status of donations, grouped by type
+* A donator report, summarizing the total contributions received from each donor

@@ -1,5 +1,5 @@
 interface Donation {
-  id?: string;
+  id?: number;
   name: string;
   type: string;
   quantity: number;

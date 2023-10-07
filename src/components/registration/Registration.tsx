@@ -31,6 +31,7 @@ function Registration({ onSubmit }: RegistrationProps) {
     onSubmit(donation);
   }
 
+  // TODO: add indicator for whether the donation was successfully submitted
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ display: "flex", p: 3, flexWrap: "wrap" }}>

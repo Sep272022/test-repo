@@ -33,6 +33,7 @@ function Distribution() {
     getAllDonations().then((donations) => setDonations(donations));
   }, []);
 
+  // TODO: add skeleton loading
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer sx={{ maxHeight: 440 }}>
