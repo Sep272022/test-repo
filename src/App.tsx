@@ -8,14 +8,15 @@ import Distribution from "./components/distribution/Distribution";
 import Registration from "./components/registration/Registration";
 import Reports from "./components/reports/Reports";
 import Donation from "./types/Donation";
-import { saveDonation } from "./utils/api";
+import { saveDonation } from "./utils/apiClient";
 
 function App() {
   const [value, setValue] = useState<number>(0);
 
+  // TODO: add toggle for dark mode
   const darkTheme = createTheme({
     palette: {
-      mode: "dark",
+      mode: "light",
     },
   });
 

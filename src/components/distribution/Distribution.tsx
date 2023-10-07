@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import Donation from "../../types/Donation";
-import { getAllDonations } from "../../utils/api";
+import { getAllDonations } from "../../utils/apiClient";
 import columns from "../table/columnsConfig";
 
 function Distribution() {
@@ -14,8 +14,21 @@ function Distribution() {
 
   // TODO: add skeleton loading
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
-      <DataGrid rows={donations} columns={columns} autoHeight />
+    <Box sx={{ width: "100%" }}>
+      <DataGrid
+        rows={donations}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 10,
+            },
+          },
+        }}
+        pageSizeOptions={[10, 25, 50]}
+        disableRowSelectionOnClick
+        autoHeight
+      />
     </Box>
   );
 }
