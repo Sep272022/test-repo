@@ -1,26 +1,41 @@
-import { Box, Button, FormControl, MenuItem, TextField } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { Dayjs } from "dayjs";
 import { useState } from "react";
 import Donation from "../../types/Donation";
+import { saveDonation } from "../../utils/apiClient";
 
-interface RegistrationProps {
-  onSubmit: (donation: Donation) => void;
-}
-
-function Registration({ onSubmit }: RegistrationProps) {
+function Registration() {
   const [name, setName] = useState<string>("");
   const [selectedDonationType, setSelectedDonationType] =
     useState<string>("Food");
   const [quantity, setQuantity] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const donationTypes = ["Food", "Money", "Clothing", "Other"];
 
-  function handleSubmit(): void {
-    // TODO: validate
+  function handleSubmit() {
+    if (!validate()) {
+      return;
+    }
+    setError("");
+    setLoading(true);
+    const submitButton = document.getElementById(
+      "submit-button"
+    ) as HTMLButtonElement;
+    submitButton.disabled = true;
 
     const donation: Donation = {
       name,
@@ -28,13 +43,44 @@ function Registration({ onSubmit }: RegistrationProps) {
       quantity,
       date: date?.format("YYYY-MM-DD") ?? "",
     };
-    onSubmit(donation);
+    saveDonation(donation)
+      .then(() => {
+        setName("");
+        setSelectedDonationType("Food");
+        setQuantity(0);
+        setDate(null);
+        setLoading(false);
+        setError("");
+      })
+      .catch((error) => {
+        setError(error.message);
+        setLoading(false);
+      })
+      .finally(() => {
+        submitButton.disabled = false;
+      });
   }
 
-  // TODO: add indicator for whether the donation was successfully submitted
+  function validate() {
+    if (!name) {
+      setError("Name is required");
+      return false;
+    }
+    if (!quantity) {
+      setError("Quantity is required");
+      return false;
+    }
+    if (!date) {
+      setError("Date is required");
+      return false;
+    }
+    return true;
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 3 }}>
+        {error && <Alert severity="error">{error}</Alert>}
         <div>
           <FormControl>
             <TextField
@@ -75,8 +121,8 @@ function Registration({ onSubmit }: RegistrationProps) {
           </FormControl>
         </div>
       </Box>
-      <Button variant="contained" onClick={handleSubmit}>
-        Submit
+      <Button id="submit-button" variant="contained" onClick={handleSubmit}>
+        {loading ? <CircularProgress color="inherit" /> : "Submit"}
       </Button>
     </LocalizationProvider>
   );

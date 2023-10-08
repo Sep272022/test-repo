@@ -7,8 +7,6 @@ import "./App.css";
 import Distribution from "./components/distribution/Distribution";
 import Registration from "./components/registration/Registration";
 import Reports from "./components/reports/Reports";
-import Donation from "./types/Donation";
-import { saveDonation } from "./utils/apiClient";
 
 function App() {
   const [value, setValue] = useState<number>(0);
@@ -16,17 +14,12 @@ function App() {
   // TODO: add toggle for dark mode
   const darkTheme = createTheme({
     palette: {
-      mode: "light",
+      mode: "dark",
     },
   });
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-  };
-
-  const submit = async (donation: Donation) => {
-    const response = await saveDonation(donation);
-    console.log(response);
   };
 
   return (
@@ -40,7 +33,7 @@ function App() {
           </Tabs>
         </Box>
         <Box sx={{ p: 3 }}>
-          {value === 0 && <Registration onSubmit={submit} />}
+          {value === 0 && <Registration />}
           {value === 1 && <Distribution />}
           {value === 2 && <Reports />}
         </Box>
