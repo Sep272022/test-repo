@@ -30,3 +30,17 @@ export const getAllDistributions = async () => {
   console.log("data", data);
   return data;
 };
+
+export const getDonationReport = async () => {
+  const response = await fetch(`${baseURL}/reports/donations`);
+  const data = await response.json();
+  console.log("data", data);
+  return data;
+};
+
+export const getDonorReport = async () => {
+  const response = await fetch(`${baseURL}/reports/donors`);
+  const data = await response.json();
+  console.log("data", data);
+  return data;
+};

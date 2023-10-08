@@ -66,22 +66,18 @@ async function initializeDatabase() {
   });
 
   console.log("Database initialization completed.");
-  checkIfDonationTypesExist();
+  await checkIfDonationTypesExist();
 }
 
 async function checkIfDonationTypesExist() {
-  try {
-    const count = await knex("DonationTypes").count("* as count").first();
-    if (count.count === 0) {
-      addInitialDonationTypes();
-    }
-  } catch (error) {
-    console.error(error.message);
+  const donationTypes = await knex("DonationTypes").select("TypeID");
+  if (donationTypes.length === 0) {
+    addInitialDonationTypes();
   }
 }
 
-function addInitialDonationTypes() {
-  knex("DonationTypes").insert([
+async function addInitialDonationTypes() {
+  await knex("DonationTypes").insert([
     { TypeName: "Food" },
     { TypeName: "Clothing" },
     { TypeName: "Money" },
@@ -213,5 +209,86 @@ app.get("/distributions", (req, res) => {
     })
     .catch((error) => {
       return res.status(500).json({ error: error.message });
+    });
+});
+
+app.get("/reports/donations", (req, res) => {
+  knex("DonationTypes as dt")
+    .leftJoin("Donations as d", "dt.TypeID", "=", "d.TypeID")
+    .leftJoin("DistributionLogs as dist", "dt.TypeID", "=", "dist.TypeID")
+    .select(
+      "dt.TypeName as Donation Type",
+      knex.raw("COALESCE(SUM(??), 0) as ??", ["d.Quantity", "Total Received"]),
+      knex.raw("COALESCE(SUM(??), 0) as ??", [
+        "dist.Quantity",
+        "Total Distributed",
+      ]),
+      knex.raw("COALESCE(SUM(??), 0) - COALESCE(SUM(??), 0) as ??", [
+        "d.Quantity",
+        "dist.Quantity",
+        "Available Amount",
+      ])
+    )
+    .groupBy("dt.TypeName")
+    .then((rows) => {
+      const donationReportKeys = {
+        "Donation Type": "donationType",
+        "Total Received": "totalReceived",
+        "Total Distributed": "totalDistributed",
+        "Available Amount": "availableAmount",
+      };
+
+      const donationReport = rows.map((row) =>
+        renameKeys(row, donationReportKeys)
+      );
+      return res.json(donationReport);
+    });
+});
+
+app.get("/reports/donors", (req, res) => {
+  knex("Donators as don")
+    .join("Donations as d", "don.DonatorID", "d.DonatorId")
+    .join("DonationTypes as dt", "d.TypeID", "dt.TypeID")
+    .select(
+      "don.Name as Donors Name",
+      knex.raw("SUM(CASE WHEN ?? = ? THEN ?? ELSE 0 END) as ??", [
+        "dt.TypeName",
+        "Food",
+        "d.Quantity",
+        "Food Donated",
+      ]),
+      knex.raw("SUM(CASE WHEN ?? = ? THEN ?? ELSE 0 END) as ??", [
+        "dt.TypeName",
+        "Money",
+        "d.Quantity",
+        "Money Donated",
+      ]),
+      knex.raw("SUM(CASE WHEN ?? = ? THEN ?? ELSE 0 END) as ??", [
+        "dt.TypeName",
+        "Clothing",
+        "d.Quantity",
+        "Clothing Donated",
+      ]),
+      knex.raw("SUM(CASE WHEN ?? = ? THEN ?? ELSE 0 END) as ??", [
+        "dt.TypeName",
+        "Other",
+        "d.Quantity",
+        "Other Donated",
+      ])
+    )
+    .groupBy("don.Name")
+    .then((row) => {
+      const donatorReportKeys = {
+        "Donors Name": "donorName",
+        "Food Donated": "foodDonated",
+        "Money Donated": "moneyDonated",
+        "Clothing Donated": "clothingDonated",
+        "Other Donated": "otherDonated",
+      };
+
+      const donatorReport = row.map((row) =>
+        renameKeys(row, donatorReportKeys)
+      );
+      return res.json(donatorReport);
     });
 });
