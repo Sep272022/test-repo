@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const express = require("express");
 const bodyParser = require("body-parser");
-const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 
 const app = express();
@@ -11,120 +10,106 @@ const PORT = 3001;
 app.use(bodyParser.json());
 app.use(cors());
 
-const db = new sqlite3.Database("./database.db", (err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-  console.log("Connected to the SQLite database.");
-
-  initializeDatabase();
+const knex = require("knex")({
+  client: "sqlite3",
+  connection: {
+    filename: "./database.db",
+  },
 });
 
-function initializeDatabase() {
-  const createDonationTypesTable = `
-    CREATE TABLE IF NOT EXISTS DonationTypes (
-      TypeID INTEGER PRIMARY KEY AUTOINCREMENT,
-      TypeName TEXT NOT NULL UNIQUE
-    );
-  `;
+initializeDatabase();
 
-  const createDonationsTable = `
-    CREATE TABLE IF NOT EXISTS Donations (
-      DonationID INTEGER PRIMARY KEY AUTOINCREMENT,
-      TypeID INTEGER NOT NULL,
-      DonatorId INTEGER NOT NULL,
-      Quantity REAL NOT NULL,
-      DonationDate DATE NOT NULL,
-      DateSubmitted DATE DEFAULT CURRENT_DATE,
-      FOREIGN KEY(TypeID) REFERENCES DonationTypes(TypeID),
-      FOREIGN KEY(DonatorId) REFERENCES Donators(DonatorId)
-    );
-  `;
+async function initializeDatabase() {
+  await knex.schema.hasTable("DonationTypes").then((exists) => {
+    if (!exists) {
+      return knex.schema.createTable("DonationTypes", (table) => {
+        table.increments("TypeID").primary();
+        table.string("TypeName").notNullable().unique();
+      });
+    }
+  });
 
-  const createDistributionLogsTable = `
-    CREATE TABLE IF NOT EXISTS DistributionLogs (
-      LogID INTEGER PRIMARY KEY AUTOINCREMENT,
-      TypeID INTEGER,
-      Quantity REAL NOT NULL,
-      DateDistributed DATE DEFAULT CURRENT_DATE,
-      FOREIGN KEY(TypeID) REFERENCES DonationTypes(TypeID)
-    );
-  `;
+  await knex.schema.hasTable("Donations").then((exists) => {
+    if (!exists) {
+      return knex.schema.createTable("Donations", (table) => {
+        table.increments("DonationID").primary();
+        table.integer("TypeID").notNullable();
+        table.integer("DonatorId").notNullable();
+        table.float("Quantity").notNullable();
+        table.date("DonationDate").notNullable();
+        table.date("DateSubmitted").defaultTo(knex.fn.now());
+        table.foreign("TypeID").references("DonationTypes.TypeID");
+        table.foreign("DonatorId").references("Donators.DonatorId");
+      });
+    }
+  });
 
-  const createDonatorsTable = `
-    CREATE TABLE IF NOT EXISTS Donators (
-      DonatorID INTEGER PRIMARY KEY AUTOINCREMENT,
-      Name TEXT NOT NULL
-    );
-  `;
+  await knex.schema.hasTable("DistributionLogs").then((exists) => {
+    if (!exists) {
+      return knex.schema.createTable("DistributionLogs", (table) => {
+        table.increments("LogID").primary();
+        table.integer("TypeID");
+        table.float("Quantity").notNullable();
+        table.date("DateDistributed").defaultTo(knex.fn.now());
+        table.foreign("TypeID").references("DonationTypes.TypeID");
+      });
+    }
+  });
 
-  db.exec(createDonationTypesTable);
-  db.exec(createDonationsTable);
-  db.exec(createDistributionLogsTable);
-  db.exec(createDonatorsTable);
+  await knex.schema.hasTable("Donators").then((exists) => {
+    if (!exists) {
+      return knex.schema.createTable("Donators", (table) => {
+        table.increments("DonatorID").primary();
+        table.string("Name").notNullable();
+      });
+    }
+  });
 
   console.log("Database initialization completed.");
   checkIfDonationTypesExist();
 }
 
-function checkIfDonationTypesExist() {
-  const sql = `SELECT COUNT(*) AS count FROM DonationTypes`;
-
-  db.get(sql, [], (err, row) => {
-    if (err) {
-      return console.error(err.message);
-    }
-
-    if (row.count === 0) {
+async function checkIfDonationTypesExist() {
+  try {
+    const count = await knex("DonationTypes").count("* as count").first();
+    if (count.count === 0) {
       addInitialDonationTypes();
     }
-  });
+  } catch (error) {
+    console.error(error.message);
+  }
 }
 
 function addInitialDonationTypes() {
-  const insertSql = `
-    INSERT INTO DonationTypes (TypeName)
-    VALUES (?)
-  `;
-
-  db.run(insertSql, ["Food"]);
-  db.run(insertSql, ["Clothing"]);
-  db.run(insertSql, ["Money"]);
-  db.run(insertSql, ["Other"]);
-
+  knex("DonationTypes").insert([
+    { TypeName: "Food" },
+    { TypeName: "Clothing" },
+    { TypeName: "Money" },
+    { TypeName: "Other" },
+  ]);
   console.log("Initial donation types added.");
 }
 
 function getDonatorId(donatorName) {
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT DonatorID FROM Donators WHERE Name = ?`;
-    db.get(sql, [donatorName], (err, row) => {
-      if (err) {
-        reject(err.message);
-      } else if (!row) {
-        addDonator(donatorName).then(resolve).catch(reject);
+  return knex("Donators")
+    .where({ Name: donatorName })
+    .first()
+    .then((row) => {
+      if (!row) {
+        return addDonator(donatorName);
       } else {
-        resolve(row.DonatorID);
+        return row.DonatorID;
       }
     });
-  });
 }
 
 function addDonator(donatorName) {
-  return new Promise((resolve, reject) => {
-    const insertSql = `
-      INSERT INTO Donators (Name)
-      VALUES (?)
-    `;
-    db.run(insertSql, [donatorName], function (err) {
-      if (err) {
-        reject(err.message);
-      } else {
-        console.log("Donator added.");
-        resolve(this.lastID);
-      }
+  return knex("Donators")
+    .insert({ Name: donatorName })
+    .then((ids) => {
+      console.log("Donator added.");
+      return ids[0];
     });
-  });
 }
 
 app.listen(PORT, () => {
@@ -140,37 +125,21 @@ app.post("/donate", async (req, res) => {
   }
 
   try {
-    const sql = `SELECT TypeID FROM DonationTypes WHERE TypeName = ?`;
-    const { TypeID } = await new Promise((resolve, reject) => {
-      db.get(sql, [type], (err, row) => {
-        if (err) {
-          reject(err.message);
-        } else if (!row) {
-          reject(`No donation type found with name ${type}`);
-        } else {
-          resolve(row);
-        }
-      });
-    });
-
+    const { TypeID } = await knex("DonationTypes")
+      .where({ TypeName: type })
+      .first();
     if (!TypeID) {
       return res.status(400).json({ error: "Invalid typeName provided" });
     }
-
     const donatorId = await getDonatorId(name);
     console.log("donatorId", donatorId);
-
-    const insertSql = `
-      INSERT INTO Donations (TypeID, DonatorId, Quantity, DonationDate, DateSubmitted)
-      VALUES (?, ?, ?, ?, CURRENT_DATE)
-    `;
-
-    db.run(insertSql, [TypeID, donatorId, quantity, date], function (err) {
-      if (err) {
-        throw err;
-      }
-      res.json({ donationID: this.lastID });
+    const [donationID] = await knex("Donations").insert({
+      TypeID,
+      DonatorId: donatorId,
+      Quantity: quantity,
+      DonationDate: date,
     });
+    res.json({ donationID });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -186,52 +155,63 @@ function renameKeys(obj, keyMapping) {
 }
 
 app.get("/donations", (req, res) => {
-  const sql = `
-    SELECT Donations.DonationID, Donators.Name, DonationTypes.TypeName, Donations.Quantity, Donations.DonationDate, Donations.DateSubmitted
-    FROM Donations
-    INNER JOIN Donators ON Donators.DonatorID = Donations.DonatorId
-    INNER JOIN DonationTypes ON DonationTypes.TypeID = Donations.TypeID
-  `;
+  knex("Donations")
+    .join("Donators", "Donators.DonatorID", "=", "Donations.DonatorId")
+    .join("DonationTypes", "DonationTypes.TypeID", "=", "Donations.TypeID")
+    .select(
+      "Donations.DonationID",
+      "Donators.Name",
+      "DonationTypes.TypeName",
+      "Donations.Quantity",
+      "Donations.DonationDate",
+      "Donations.DateSubmitted"
+    )
+    .then((rows) => {
+      const donationKeys = {
+        DonationID: "id",
+        Name: "name",
+        TypeName: "type",
+        Quantity: "quantity",
+        DonationDate: "date",
+        DateSubmitted: "dateSubmitted",
+      };
 
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    const donationKeys = {
-      DonationID: "id",
-      Name: "name",
-      TypeName: "type",
-      Quantity: "quantity",
-      DonationDate: "date",
-      DateSubmitted: "dateSubmitted",
-    };
-
-    const donations = rows.map((row) => renameKeys(row, donationKeys));
-    return res.json(donations);
-  });
+      const donations = rows.map((row) => renameKeys(row, donationKeys));
+      return res.json(donations);
+    })
+    .catch((error) => {
+      return res.status(500).json({ error: error.message });
+    });
 });
 
 app.get("/distributions", (req, res) => {
-  const sql = `
-    SELECT DistributionLogs.LogID, DonationTypes.TypeName, DistributionLogs.Quantity, DistributionLogs.DateDistributed
-    FROM DistributionLogs
-    INNER JOIN DonationTypes ON DonationTypes.TypeID = DistributionLogs.TypeID
-  `;
+  knex("DistributionLogs")
+    .join(
+      "DonationTypes",
+      "DonationTypes.TypeID",
+      "=",
+      "DistributionLogs.TypeID"
+    )
+    .select(
+      "DistributionLogs.LogID",
+      "DonationTypes.TypeName",
+      "DistributionLogs.Quantity",
+      "DistributionLogs.DateDistributed"
+    )
+    .then((rows) => {
+      const distributionKeys = {
+        LogID: "id",
+        TypeName: "type",
+        Quantity: "quantity",
+        DateDistributed: "date",
+      };
 
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    const distributionKeys = {
-      LogID: "id",
-      TypeName: "type",
-      Quantity: "quantity",
-      DateDistributed: "date",
-    };
-
-    const distributions = rows.map((row) => renameKeys(row, distributionKeys));
-    return res.json(distributions);
-  });
+      const distributions = rows.map((row) =>
+        renameKeys(row, distributionKeys)
+      );
+      return res.json(distributions);
+    })
+    .catch((error) => {
+      return res.status(500).json({ error: error.message });
+    });
 });
