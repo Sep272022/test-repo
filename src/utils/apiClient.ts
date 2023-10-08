@@ -23,3 +23,10 @@ export const getAllDonations = async () => {
   console.log("data", data);
   return data;
 };
+
+export const getAllDistributions = async () => {
+  const response = await fetch(`${baseURL}/distributions`);
+  const data = await response.json();
+  console.log("data", data);
+  return data;
+};

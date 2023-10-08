@@ -211,3 +211,27 @@ app.get("/donations", (req, res) => {
     return res.json(donations);
   });
 });
+
+app.get("/distributions", (req, res) => {
+  const sql = `
+    SELECT DistributionLogs.LogID, DonationTypes.TypeName, DistributionLogs.Quantity, DistributionLogs.DateDistributed
+    FROM DistributionLogs
+    INNER JOIN DonationTypes ON DonationTypes.TypeID = DistributionLogs.TypeID
+  `;
+
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    const distributionKeys = {
+      LogID: "id",
+      TypeName: "type",
+      Quantity: "quantity",
+      DateDistributed: "date",
+    };
+
+    const distributions = rows.map((row) => renameKeys(row, distributionKeys));
+    return res.json(distributions);
+  });
+});

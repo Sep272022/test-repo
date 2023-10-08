@@ -7,4 +7,10 @@ const columns: GridColDef[] = [
   { field: "date", headerName: "Date", width: 100 },
 ];
 
-export default columns;
+const columns2: GridColDef[] = [
+  { field: "type", headerName: "Donation Type", width: 200 },
+  { field: "quantity", headerName: "Quantity", width: 150 },
+  { field: "date", headerName: "Date", width: 100 },
+];
+
+export { columns, columns2 };

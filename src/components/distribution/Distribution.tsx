@@ -2,22 +2,23 @@ import { Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import Donation from "../../types/Donation";
-import { getAllDonations } from "../../utils/apiClient";
-import columns from "../table/columnsConfig";
+import { getAllDistributions } from "../../utils/apiClient";
+import { columns2 } from "../table/columnsConfig";
 
 function Distribution() {
-  const [donations, setDonations] = useState<Donation[]>([]);
+  const [distributions, setDistributions] = useState<Donation[]>([]);
 
   useEffect(() => {
-    getAllDonations().then((donations) => setDonations(donations));
+    getAllDistributions().then((distributions) =>
+      setDistributions(distributions)
+    );
   }, []);
 
-  // TODO: add skeleton loading
   return (
     <Box sx={{ width: "100%" }}>
       <DataGrid
-        rows={donations}
-        columns={columns}
+        rows={distributions}
+        columns={columns2}
         initialState={{
           pagination: {
             paginationModel: {
