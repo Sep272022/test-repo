@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import Donation from "../../types/Donation";
 import { getAllDistributions } from "../../utils/apiClient";
-import { columns2 } from "../table/columnsConfig";
+import { columns } from "../table/columnsConfig";
 
 function Distribution() {
   const [distributions, setDistributions] = useState<Donation[]>([]);
@@ -18,7 +18,7 @@ function Distribution() {
     <Box sx={{ width: "100%" }}>
       <DataGrid
         rows={distributions}
-        columns={columns2}
+        columns={columns}
         initialState={{
           pagination: {
             paginationModel: {
