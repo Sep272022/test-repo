@@ -2,7 +2,7 @@
 
 ## Donation Registration
 
-* An user can submit the detail of a donation record
+* A user can submit the details of a donation record
 
 |name | type|
 |-----|-----|
@@ -13,7 +13,7 @@
 
 ## Donation Distribution
 
-* An user can see distribution logs that contain the type of donation, quantity, and the date of distribution
+* A user can see distribution logs that contain the type of donation, quantity, and date of distribution
 
 ## Donation Reports
 
