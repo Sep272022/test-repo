@@ -19,6 +19,10 @@ const knex = require("knex")({
 
 initializeDatabase();
 
+/**
+ * Initializes the database by creating necessary tables if they don't exist.
+ * Also checks if DonationTypes exist in the table.
+ */
 async function initializeDatabase() {
   await knex.schema.hasTable("DonationTypes").then((exists) => {
     if (!exists) {
@@ -69,6 +73,10 @@ async function initializeDatabase() {
   await checkIfDonationTypesExist();
 }
 
+/**
+ * Checks if there are any existing donation types in the database.
+ * If there are no existing donation types, it adds initial donation types.
+ */
 async function checkIfDonationTypesExist() {
   const donationTypes = await knex("DonationTypes").select("TypeID");
   if (donationTypes.length === 0) {
@@ -76,6 +84,9 @@ async function checkIfDonationTypesExist() {
   }
 }
 
+/**
+ * Adds initial donation types to the DonationTypes table in the database.
+ */
 async function addInitialDonationTypes() {
   await knex("DonationTypes").insert([
     { TypeName: "Food" },
@@ -86,6 +97,12 @@ async function addInitialDonationTypes() {
   console.log("Initial donation types added.");
 }
 
+/**
+ * Retrieves the DonatorID associated with the given donatorName.
+ * If the donatorName does not exist in the database, a new Donator is added and its DonatorID is returned.
+ * @param donatorName - The name of the donator to retrieve the DonatorID for.
+ * @returns A Promise that resolves with the DonatorID
+ */
 function getDonatorId(donatorName) {
   return knex("Donators")
     .where({ Name: donatorName })
@@ -99,6 +116,11 @@ function getDonatorId(donatorName) {
     });
 }
 
+/**
+ * Adds a new donator to the database.
+ * @param donatorName - The name of the donator to be added.
+ * @returns A Promise that resolves with the ID of the newly added donator.
+ */
 function addDonator(donatorName) {
   return knex("Donators")
     .insert({ Name: donatorName })
@@ -139,6 +161,12 @@ app.post("/donate", async (req, res) => {
   }
 });
 
+/**
+ * Renames keys of an object based on a key mapping.
+ * @param obj - The object whose keys will be renamed.
+ * @param keyMapping - An object that maps old keys to new keys.
+ * @returns A new object with the renamed keys.
+ */
 function renameKeys(obj, keyMapping) {
   return Object.keys(obj).reduce((acc, key) => {
     return {

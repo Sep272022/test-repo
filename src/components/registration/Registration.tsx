@@ -62,6 +62,10 @@ function Registration() {
       });
   }
 
+  /**
+   * Validates the registration form fields.
+   * @returns true if all fields are valid, otherwise false.
+   */
   function validate() {
     if (!name) {
       setError("Name is required");
