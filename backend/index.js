@@ -114,7 +114,6 @@ app.listen(PORT, () => {
 
 app.post("/donate", async (req, res) => {
   const { name, type, quantity, date } = req.body;
-  console.log("req.body", req.body);
 
   if (!type || !quantity) {
     return res.status(400).json({ error: "type and quantity are required" });
@@ -128,7 +127,6 @@ app.post("/donate", async (req, res) => {
       return res.status(400).json({ error: "Invalid typeName provided" });
     }
     const donatorId = await getDonatorId(name);
-    console.log("donatorId", donatorId);
     const [donationID] = await knex("Donations").insert({
       TypeID,
       DonatorId: donatorId,
