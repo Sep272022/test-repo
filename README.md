@@ -4,13 +4,6 @@
 
 * A user can submit the details of a donation record
 
-|name | type|
-|-----|-----|
-|Donor's name | string|
-|Type of donation| string|
-|Quantity| number|
-|Date of donation| string|
-
 ## Donation Distribution
 
 * A user can see distribution logs that contain the type of donation, quantity, and date of distribution
