@@ -17,30 +17,31 @@ export const saveDonation = async (donation: Donation) => {
   return response.json();
 };
 
+async function handleResponse(response: Response) {
+  if (!response.ok) {
+    throw Error(response.statusText);
+  }
+  const data = await response.json();
+  console.log("data received", data);
+  return data;
+}
+
 export const getAllDonations = async () => {
   const response = await fetch(`${baseURL}/donations`);
-  const data = await response.json();
-  console.log("data", data);
-  return data;
+  return await handleResponse(response);
 };
 
 export const getAllDistributions = async () => {
   const response = await fetch(`${baseURL}/distributions`);
-  const data = await response.json();
-  console.log("data", data);
-  return data;
+  return await handleResponse(response);
 };
 
 export const getDonationReport = async () => {
   const response = await fetch(`${baseURL}/reports/donations`);
-  const data = await response.json();
-  console.log("data", data);
-  return data;
+  return await handleResponse(response);
 };
 
 export const getDonorReport = async () => {
   const response = await fetch(`${baseURL}/reports/donors`);
-  const data = await response.json();
-  console.log("data", data);
-  return data;
+  return await handleResponse(response);
 };
