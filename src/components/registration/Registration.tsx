@@ -13,18 +13,19 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/L
 import { Dayjs } from "dayjs";
 import { useState } from "react";
 import Donation from "../../types/Donation";
+import { DonationTypes } from "../../types/DonationTypes";
 import { saveDonation } from "../../utils/apiClient";
 
 function Registration() {
   const [name, setName] = useState<string>("");
   const [selectedDonationType, setSelectedDonationType] =
-    useState<string>("Food");
+    useState<DonationTypes | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const donationTypes = ["Food", "Money", "Clothing", "Other"];
+  const donationTypes = ["Food", "Clothing", "Money", "Other"];
 
   function handleSubmit() {
     if (!validate()) {
@@ -39,9 +40,9 @@ function Registration() {
 
     const donation: Donation = {
       name,
-      type: selectedDonationType,
+      type: selectedDonationType!,
       quantity,
-      date: date?.format("YYYY-MM-DD") ?? "",
+      date: date!.format("YYYY-MM-DD"),
     };
     saveDonation(donation)
       .then(() => {
@@ -64,6 +65,10 @@ function Registration() {
   function validate() {
     if (!name) {
       setError("Name is required");
+      return false;
+    }
+    if (!selectedDonationType) {
+      setError("Type is required");
       return false;
     }
     if (!quantity) {
@@ -92,14 +97,14 @@ function Registration() {
             <TextField
               select
               label="Type"
-              defaultValue={selectedDonationType}
+              value={selectedDonationType ?? ""}
               sx={{ m: 1, width: "25ch" }}
             >
               {donationTypes.map((type) => (
                 <MenuItem
                   key={type}
                   value={type}
-                  onSelect={() => setSelectedDonationType(type)}
+                  onClick={() => setSelectedDonationType(type as DonationTypes)}
                 >
                   {type}
                 </MenuItem>
