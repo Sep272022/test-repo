@@ -19,3 +19,7 @@
 
 * An inventory report displaying the current status of donations, grouped by type
 * A donator report, summarizing the total contributions received from each donor
+
+
+# Database Diagram
+![database diagram](image/db_diagram.png)
