@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { knex, initializeDatabase } = require("./dbinit");
+const { donationRequestValidator } = require("./validate");
 
 const app = express();
 const PORT = 3001;
@@ -50,6 +51,10 @@ function addDonator(donatorName) {
     });
 }
 app.post("/donate", async (req, res) => {
+  if (!donationRequestValidator(req.body)) {
+    return res.status(400).json({ error: "Invalid donation request" });
+  }
+
   const { name, type, quantity, date } = req.body;
 
   if (!type || !quantity) {
