@@ -3,11 +3,12 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "module": "commonjs", 
     "skipLibCheck": true,
+    "esModuleInterop":true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -26,9 +27,15 @@
   "include": ["src", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }],
 
-  "jest": {
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-  },
+  // "jest": {
+  //   "setupFilesAfterEnv": [
+  //     "./setupTests.ts"
+  //   ],
+  //   "transform": {
+  //     "^.+\\.(ts|tsx)?$": "ts-jest",
+  //     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+  //   },
+  //   "preset": "ts-jest",
+  //   "testEnvironment": "jsdom",
+  // }
 }

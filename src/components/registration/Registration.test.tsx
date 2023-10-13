@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom/extend-expect";
+import "@testing-library/jest-dom/matchers";
 import {
   act,
   fireEvent,
@@ -10,9 +10,11 @@ import { saveDonation } from "../../utils/apiClient";
 import Registration from "./Registration";
 
 // Mocking the saveDonation function since we don't actually want to call the API during tests
-jest.mock("../../utils/apiClient", () => ({
-  saveDonation: jest.fn(),
-}));
+jest.mock("../../utils/apiClient", () => {
+  return {
+    saveDonation: jest.fn(),
+  };
+});
 
 describe("Registration", () => {
   it("renders correctly", () => {
@@ -30,7 +32,11 @@ describe("Registration", () => {
   });
 
   it("submits the form correctly with valid data", async () => {
-    (saveDonation as jest.Mock).mockResolvedValueOnce(undefined);
+    const mockedSaveDonation = saveDonation as jest.MockedFunction<
+      typeof saveDonation
+    >;
+
+    mockedSaveDonation.mockResolvedValueOnce(undefined);
 
     render(<Registration />);
 
