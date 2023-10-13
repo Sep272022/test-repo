@@ -26,16 +26,4 @@
   },
   "include": ["src", "setupTests.ts"],
   "references": [{ "path": "./tsconfig.node.json" }],
-
-  // "jest": {
-  //   "setupFilesAfterEnv": [
-  //     "./setupTests.ts"
-  //   ],
-  //   "transform": {
-  //     "^.+\\.(ts|tsx)?$": "ts-jest",
-  //     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-  //   },
-  //   "preset": "ts-jest",
-  //   "testEnvironment": "jsdom",
-  // }
 }
