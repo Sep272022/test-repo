@@ -1,38 +1,29 @@
-// import "@testing-library/jest-dom/matchers";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import "@testing-library/jest-dom/";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
 import { saveDonation } from "../../utils/apiClient";
-// FIXME: Error: SyntaxError: Cannot use import statement outside a module at node_modules\@mui\x-date-pickers\DatePicker\DatePicker.js:1
 import Registration from "./Registration";
 
-jest.mock("../../utils/apiClient", () => {
-  return {
-    saveDonation: jest.fn(),
-  };
-});
+jest.mock("../../utils/apiClient", () => ({
+  saveDonation: jest.fn(),
+}));
 
-const fillField = (label: string, value: string) => {
-  fireEvent.change(screen.getByLabelText(label), {
-    target: { value: value },
-  });
+const fillField = async (label: string, value: string) => {
+  const input = screen.getByLabelText(label);
+  await userEvent.type(input, value);
 };
 
 const selectItem = async (label: string, value: string) => {
-  fireEvent.mouseDown(screen.getByLabelText(label));
+  await userEvent.click(screen.getByLabelText(label));
   const listItem = await screen.findByText(value);
-  fireEvent.click(listItem);
+  await userEvent.click(listItem);
 };
 
 const clickSubmitAndCheckError = async (
   submitText: string,
   errorText: string
 ) => {
-  fireEvent.click(screen.getByText(submitText));
+  await userEvent.click(screen.getByText(submitText));
   const errorMessage = await screen.findByText(errorText);
   expect(errorMessage).toBeInTheDocument();
 };
@@ -48,13 +39,13 @@ describe("Registration", () => {
 
     await clickSubmitAndCheckError("Submit", "Name is required");
 
-    fillField("Name", "John Doe");
+    await fillField("Name", "John Doe");
     await clickSubmitAndCheckError("Submit", "Type is required");
 
     await selectItem("Type", "Food");
     await clickSubmitAndCheckError("Submit", "Quantity is required");
 
-    fillField("Quantity", "5");
+    await fillField("Quantity", "5");
     await clickSubmitAndCheckError("Submit", "Date is required");
   });
 
@@ -67,24 +58,23 @@ describe("Registration", () => {
 
     render(<Registration />);
 
-    fillField("Name", "John Doe");
+    await fillField("Name", "John Doe");
     await selectItem("Type", "Food");
-    fillField("Quantity", "5");
-    fillField("Date", "2021-04-01");
+    await fillField("Quantity", "5");
+    await fillField("Date", "04012021");
 
     await act(async () => {
-      fireEvent.click(screen.getByText("Submit"));
+      await userEvent.click(screen.getByText("Submit"));
     });
 
-    await waitFor(() => {
+    await waitFor(async () => {
       expect(saveDonation).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockedSaveDonation).toHaveBeenCalledWith({
-      name: "John Doe",
-      type: "Food",
-      quantity: 5,
-      date: "2021-04-01",
+      expect(mockedSaveDonation).toHaveBeenCalledWith({
+        name: "John Doe",
+        type: "Food",
+        quantity: 5,
+        date: "2021-04-01",
+      });
     });
   });
 });
