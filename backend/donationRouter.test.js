@@ -1,10 +1,10 @@
 const request = require("supertest");
 const express = require("express");
-const DonationRouter = require("./donationRouter");
+const donationRouter = require("./donationRouter.js");
 
 const app = express();
 app.use(express.json());
-app.use(DonationRouter);
+app.use(donationRouter);
 
 const VALID_DONATION_REQUEST = {
   name: "John Doe",
@@ -15,9 +15,21 @@ const VALID_DONATION_REQUEST = {
 
 const INVALID_TYPE_NAME = "InvalidType";
 
-const mockDb = {
-  fetchdistributions: jest.fn(),
-};
+// jest.mock("./donationRouter", () => {
+//   const originalModule = jest.requireActual("./donationRouter");
+//   return {
+//     ...originalModule,
+//     knex: () => mockDb,
+//   };
+// });
+
+// const mockDb = {
+//   select: jest.fn().mockReturnThis(),
+//   from: jest.fn().mockReturnThis(),
+//   where: jest.fn().mockReturnThis(),
+//   first: jest.fn().mockReturnThis(),
+//   insert: jest.fn().mockReturnThis(),
+// };
 
 const VALID_DISTRIBUTION_LOGS = [
   {
@@ -115,7 +127,7 @@ describe("Donation Server", () => {
     });
 
     it("should return a list of distributions", async () => {
-      mockDb.fetchdistributions.mockReturnValueOnce(VALID_DISTRIBUTION_LOGS);
+      // TODO: find a way to mock the database
       const response = await request(app).get("/distributions");
       expect(response.body).toEqual(
         expect.arrayContaining([

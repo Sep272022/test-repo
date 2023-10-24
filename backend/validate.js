@@ -8,7 +8,7 @@ const donationRequestSchema = {
   type: "object",
   properties: {
     name: { type: "string" },
-    type: { type: "string", enum: donationTypes },
+    type: { type: "string", enum: donationTypes.map((type) => type.TypeName) },
     quantity: { type: "number", minimum: 0 },
     date: { type: "string" },
   },
