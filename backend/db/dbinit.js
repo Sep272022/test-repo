@@ -7,7 +7,7 @@ const knex = require("knex")({
   },
 });
 
-const donationTypes = require("./donationTypes");
+const donationTypes = require("../utils/donationTypes");
 
 /**
  * Initializes the database by creating necessary tables if they don't exist.
