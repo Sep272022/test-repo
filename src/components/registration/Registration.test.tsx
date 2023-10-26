@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { saveDonation } from "../../utils/apiClient";
 import Registration from "./Registration";
@@ -64,16 +64,14 @@ describe("Registration", () => {
     await fillField("Date", "04012021");
 
     await act(async () => {
-      await userEvent.click(screen.getByText("Submit"));
-    });
-
-    await waitFor(async () => {
-      expect(saveDonation).toHaveBeenCalledTimes(1);
-      expect(mockedSaveDonation).toHaveBeenCalledWith({
-        name: "John Doe",
-        type: "Food",
-        quantity: 5,
-        date: "2021-04-01",
+      userEvent.click(screen.getByText("Submit")).then(() => {
+        expect(saveDonation).toHaveBeenCalledTimes(1);
+        expect(mockedSaveDonation).toHaveBeenCalledWith({
+          name: "John Doe",
+          type: "Food",
+          quantity: 5,
+          date: "2021-04-01",
+        });
       });
     });
   });
