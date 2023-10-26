@@ -6,17 +6,6 @@ import Donation from "../types/Donation";
 
 const baseURL = "http://localhost:3001";
 
-export const saveDonation = async (donation: Donation) => {
-  const response = await fetch(`${baseURL}/donate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(donation),
-  });
-  return response.json();
-};
-
 async function handleResponse(response: Response) {
   if (!response.ok) {
     throw Error(response.statusText);
@@ -25,6 +14,17 @@ async function handleResponse(response: Response) {
   console.log("data received", data);
   return data;
 }
+
+export const saveDonation = async (donation: Donation) => {
+  const response = await fetch(`${baseURL}/donate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(donation),
+  });
+  return await handleResponse(response);
+};
 
 export const getAllDonations = async () => {
   const response = await fetch(`${baseURL}/donations`);
