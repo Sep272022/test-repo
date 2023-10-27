@@ -19,7 +19,7 @@ const postDonation = (db) => async (req, res) => {
       quantity,
       date,
     });
-    res.json({ donationID });
+    res.status(200).json({ donationID });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
