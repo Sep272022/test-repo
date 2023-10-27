@@ -52,21 +52,102 @@ describe("DonationService", () => {
     });
   });
 
-  it("fails to add donation with invalid type", async () => {
-    const donation = {
-      name: "John Doe",
-      type: "Invalid",
-      quantity: 5,
-      date: "2020-01-01",
-    };
-    DonationTypeService.getId = jest.fn().mockImplementation(() => {
-      throw new Error("Invalid typeName provided");
-    });
-    DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+  describe("should fail to add donation with invalid or missing field", () => {
+    it("fails to add donation with invalid type", async () => {
+      const donation = {
+        name: "John Doe",
+        type: "Invalid",
+        quantity: 5,
+        date: "2020-01-01",
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(null);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
 
-    const db = (tableName) => mockDb;
-    await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
-      "Invalid typeName provided"
-    );
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Invalid donation"
+      );
+    });
+
+    it("fails to add donation with missing name", async () => {
+      const donation = {
+        type: "Food",
+        quantity: 5,
+        date: "2020-01-01",
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(1);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Invalid donation"
+      );
+    });
+
+    it("fails to add donation with missing type", async () => {
+      const donation = {
+        name: "John Doe",
+        quantity: 5,
+        date: "2020-01-01",
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(1);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Invalid donation"
+      );
+    });
+
+    it("fails to add donation with missing quantity", async () => {
+      const donation = {
+        name: "John Doe",
+        type: "Food",
+        date: "2020-01-01",
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(1);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Invalid donation"
+      );
+    });
+
+    it("fails to add donation with missing date", async () => {
+      const donation = {
+        name: "John Doe",
+        type: "Food",
+        quantity: 5,
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(1);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Invalid donation"
+      );
+    });
+  });
+
+  describe("should handle a database error", () => {
+    it("fails to add donation with database error", async () => {
+      const donation = {
+        name: "John Doe",
+        type: "Food",
+        quantity: 5,
+        date: "2020-01-01",
+      };
+      DonationTypeService.getId = jest.fn().mockReturnValue(1);
+      DonorService.getDonatorId = jest.fn().mockReturnValue(1);
+      mockDb.insert = jest.fn().mockImplementation(() => {
+        throw new Error("Database error");
+      });
+
+      const db = (tableName) => mockDb;
+      await expect(DonationService.makeDonation(db, donation)).rejects.toThrow(
+        "Database error"
+      );
+    });
   });
 });
