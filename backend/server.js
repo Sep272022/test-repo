@@ -26,3 +26,6 @@ app.get("/reports/donors", ReportController.getReportByDonor(knex));
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// For testing purposes
+module.exports = app;
