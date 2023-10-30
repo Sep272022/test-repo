@@ -7,12 +7,7 @@ const knex = require("knex")({
   },
 });
 
-const donationTypes = [
-  { TypeName: "Food" },
-  { TypeName: "Clothing" },
-  { TypeName: "Money" },
-  { TypeName: "Other" },
-];
+const donationTypes = require("../utils/donationTypes");
 
 /**
  * Initializes the database by creating necessary tables if they don't exist.

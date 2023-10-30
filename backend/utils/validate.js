@@ -2,13 +2,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const Ajv = require("ajv");
 const ajv = new Ajv();
+const donationTypes = require("./donationTypes");
 
 const donationRequestSchema = {
   type: "object",
   properties: {
     name: { type: "string" },
-    type: { type: "string" },
-    quantity: { type: "number" },
+    type: { type: "string", enum: donationTypes.map((type) => type.TypeName) },
+    quantity: { type: "number", minimum: 0 },
     date: { type: "string" },
   },
   required: ["name", "type", "quantity", "date"],
