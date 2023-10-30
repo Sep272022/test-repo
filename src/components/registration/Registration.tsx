@@ -7,8 +7,9 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker/DesktopDatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider";
 import { Dayjs } from "dayjs";
 import { useState } from "react";
 import Donation from "../../types/Donation";
@@ -21,6 +22,7 @@ function Registration() {
     useState<DonationTypes | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -61,6 +63,30 @@ function Registration() {
       });
   }
 
+  // If the quantity input is 0, clear the input when the user clicks on it.
+  const handleQuantityClick = () => {
+    const quantityInput = document.getElementById(
+      "quantity-input"
+    ) as HTMLInputElement | null;
+    if (quantityInput && quantityInput.value === "0") {
+      quantityInput.value = "";
+    }
+  };
+
+  // When the user hovers over the type input, open the dropdown.
+  // FIXME: It doesn't work on mobile.
+  const handleMouseEnter = () => {
+    const selectElement = document.getElementById("type-input");
+    if (selectElement) {
+      const mouseEvent = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      selectElement.dispatchEvent(mouseEvent);
+    }
+  };
+
   /**
    * Validates the registration form fields.
    * @returns true if all fields are valid, otherwise false.
@@ -74,8 +100,16 @@ function Registration() {
       setError("Type is required");
       return false;
     }
+    if (!donationTypes.includes(selectedDonationType)) {
+      setError("Type is invalid");
+      return false;
+    }
     if (!quantity) {
       setError("Quantity is required");
+      return false;
+    }
+    if (quantity <= 0) {
+      setError("Quantity must be greater than 0");
       return false;
     }
     if (!date) {
@@ -88,46 +122,59 @@ function Registration() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 3 }}>
-        {error && <Alert severity="error">{error}</Alert>}
-        <div>
-          <FormControl>
-            <TextField
-              label="Name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              sx={{ m: 1, width: "25ch" }}
-            />
-            <TextField
-              select
-              label="Type"
-              value={selectedDonationType ?? ""}
-              sx={{ m: 1, width: "25ch" }}
-            >
-              {donationTypes.map((type) => (
-                <MenuItem
-                  key={type}
-                  value={type}
-                  onClick={() => setSelectedDonationType(type as DonationTypes)}
-                >
-                  {type}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              label="Quantity"
-              type="number"
-              value={quantity}
-              onChange={(event) => setQuantity(Number(event.target.value))}
-              sx={{ m: 1, width: "25ch" }}
-            />
-            <DatePicker
+        <FormControl>
+          {error && <Alert severity="error">{error}</Alert>}
+          <TextField
+            label="Name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            sx={{ m: 1, width: "25ch" }}
+          />
+          <TextField
+            select
+            id="type-input"
+            label="Type"
+            value={selectedDonationType ?? ""}
+            sx={{ m: 1, width: "25ch" }}
+            InputProps={{
+              onMouseEnter: handleMouseEnter,
+            }}
+          >
+            {donationTypes.map((type) => (
+              <MenuItem
+                key={type}
+                value={type}
+                onClick={() => setSelectedDonationType(type as DonationTypes)}
+              >
+                {type}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            id="quantity-input"
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onClick={handleQuantityClick}
+            onChange={(event) => setQuantity(Number(event.target.value))}
+            sx={{ m: 1, width: "25ch" }}
+          />
+          <div
+            onMouseEnter={() => setIsDatePickerOpen(true)}
+            onMouseLeave={() => setIsDatePickerOpen(false)}
+          >
+            <DesktopDatePicker
               label="Date"
               value={date}
-              onChange={(newValue) => setDate(newValue)}
+              open={isDatePickerOpen}
+              onChange={(newValue) => {
+                setDate(newValue);
+                setIsDatePickerOpen(false);
+              }}
               sx={{ m: 1, width: "25ch" }}
             />
-          </FormControl>
-        </div>
+          </div>
+        </FormControl>
       </Box>
       <Button id="submit-button" variant="contained" onClick={handleSubmit}>
         {loading ? <CircularProgress color="inherit" /> : "Submit"}
