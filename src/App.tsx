@@ -1,5 +1,17 @@
-import { Tab, Tabs, useMediaQuery } from "@mui/material";
-import Box from "@mui/material/Box/Box";
+import MenuIcon from "@mui/icons-material/Menu";
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import ThemeProvider from "@mui/material/styles/ThemeProvider";
 import createTheme from "@mui/material/styles/createTheme";
 import { useMemo, useState } from "react";
@@ -8,8 +20,12 @@ import Distribution from "./components/distribution/Distribution";
 import Registration from "./components/registration/Registration";
 import Reports from "./components/reports/Reports";
 
+const pages = ["Registration", "Distribution", "Reports"];
+
 function App() {
-  const [value, setValue] = useState<number>(0);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+
+  const [currentPage, setCurrentPage] = useState<String>(pages[0]);
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
 
@@ -23,26 +39,100 @@ function App() {
     [prefersDarkMode]
   );
 
-  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handlePageMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    const page = event.currentTarget.textContent;
+    if (page) {
+      setCurrentPage(page);
+    }
+    handleCloseNavMenu();
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ width: "100%", height: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Registration" />
-            <Tab label="Distribution" />
-            <Tab label="Reports" />
-          </Tabs>
+      <AppBar position="static">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <Typography
+              variant="h6"
+              noWrap
+              component="a"
+              href="/"
+              sx={{
+                mr: 2,
+                display: { xs: "none", sm: "flex" },
+                fontWeight: 700,
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              <VolunteerActivismIcon sx={{ mr: 1 }} />
+              Donation Management System
+            </Typography>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", sm: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="menu"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: "block", sm: "none" },
+                }}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page} onClick={handlePageMenuClick}>
+                    <Typography textAlign="center">{page}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+            <Box sx={{ flexGrow: 1, display: { xs: "none", sm: "flex" } }}>
+              {pages.map((page) => (
+                <Button
+                  key={page}
+                  onClick={handlePageMenuClick}
+                  sx={{ my: 2, color: "white", display: "block" }}
+                >
+                  {page}
+                </Button>
+              ))}
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+      <Container maxWidth="xl">
+        <Box sx={{ my: 2 }}>
+          {currentPage === "Registration" && <Registration />}
+          {currentPage === "Distribution" && <Distribution />}
+          {currentPage === "Reports" && <Reports />}
         </Box>
-        <Box sx={{ p: 3 }}>
-          {value === 0 && <Registration />}
-          {value === 1 && <Distribution />}
-          {value === 2 && <Reports />}
-        </Box>
-      </Box>
+      </Container>
     </ThemeProvider>
   );
 }
